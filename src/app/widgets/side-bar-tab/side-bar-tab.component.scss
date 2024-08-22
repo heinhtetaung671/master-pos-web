@@ -1,0 +1,7 @@
+.side-bar-tab {
+    @apply md:p-3.5 hover:text-black hover:shadow-inner shadow-black transition-all duration-200 cursor-pointer
+}
+
+.side-bar-tab-active {
+    @apply border-l-4 border-black text-black
+}

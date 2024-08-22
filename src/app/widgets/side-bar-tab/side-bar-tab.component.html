@@ -1,0 +1,4 @@
+<a class="side-bar-tab flex flex-col items-center text-center gap-y-1.5" [routerLink]="path()" routerLinkActive="side-bar-tab-active" [routerLinkActiveOptions]="{ exact: path()[0] == '/' }">
+    <ng-content select="[icon]"></ng-content>
+    <span>{{ title() }}</span>
+</a>
