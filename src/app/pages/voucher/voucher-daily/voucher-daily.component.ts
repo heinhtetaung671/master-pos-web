@@ -1,19 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
-import { CategoryComponent } from './category/category.component';
-import { VoucherDialogComponent } from './voucher-dialog/voucher-dialog.component';
+import { VoucherDialogComponent } from '../voucher-dialog/voucher-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { VoucherService } from '../../services/voucher.service';
-import { VoucherDailyComponent } from './voucher-daily/voucher-daily.component';
+import { VoucherService } from '../../../services/voucher.service';
 import { RouterModule } from '@angular/router';
 
 
 @Component({
-  selector: 'app-voucher',
+  selector: 'app-voucher-daily',
   standalone: true,
-  imports: [CategoryComponent, VoucherDialogComponent, VoucherDailyComponent, RouterModule],
-  templateUrl: './voucher.component.html',
+  imports: [RouterModule],
+  templateUrl: './voucher-daily.component.html',
 })
-export class VoucherComponent {
+export class VoucherDailyComponent {
 
   readonly voucherDialog = inject(MatDialog);
   readonly service = inject(VoucherService);

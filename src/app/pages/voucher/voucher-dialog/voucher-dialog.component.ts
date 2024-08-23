@@ -27,8 +27,8 @@ import { MsgBottomSheetStatus } from '../../../types/types';
 })
 export class VoucherDialogComponent {
 
-  readonly service = inject(VoucherService);
   readonly categoryService = inject(CategoryService);
+  readonly service = inject(VoucherService);
   readonly dialogRef = inject(MatDialogRef<VoucherDialogComponent>)
   readonly msgBottomSheet = inject(MatBottomSheet);
 
@@ -61,6 +61,7 @@ export class VoucherDialogComponent {
   }
 
   create() {
+    console.log(this.form?.value)
     this.progressBarClass.set('block');
       this.service.create(this.form!.value).subscribe({
         next: result => {

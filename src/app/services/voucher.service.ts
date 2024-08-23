@@ -25,4 +25,7 @@ export class VoucherService {
     return this.http.put<any>(`${BASE_URL}/${id}`, form)
   }
 
+  findByDate(date: any) {
+    return this.http.get<any>(`${BASE_URL}/find/${date}`);
+  }
 }
