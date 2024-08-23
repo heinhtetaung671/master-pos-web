@@ -73,14 +73,18 @@ export class VoucherDialogComponent {
   }
 
   create() {
-    this.progressBarClass.set('block');
-      this.service.create(this.form!.value).subscribe({
+    this.showProgressBar();
+    this.service.create(this.form!.value).subscribe({
         next: result => {
-          this.openMsgBottomSheet('success', 'Success', [`${result.customerName} has been created successfully!`])
+          this.openMsgBottomSheet('success', 'Success', [`${result.customerName} has been created successfully!`]);
           this.dialogRef.close();
       },
       error: error => {
         this.openMsgBottomSheet('error', 'Error', error.error.errorMessages);
+        this.hiddenProgressBar();
+      }, 
+      complete: () => {
+        this.hiddenProgressBar();
       }
     });
   }
@@ -106,6 +110,14 @@ export class VoucherDialogComponent {
 
   openMsgBottomSheet(status: MsgBottomSheetStatus, title: string, msg: string[]) {
     this.msgBottomSheet.open(MsgBottomSheetComponent, { data: { status: status, title: title, msg: msg}  });
+  }
+
+  showProgressBar() {
+    this.progressBarClass.set('block');
+  }
+
+  hiddenProgressBar() {
+    this.progressBarClass.set('hidden');
   }
 
 }

@@ -1,49 +1,54 @@
-<div class="flex justify-between">
-    <span class="flex gap-1 items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-        </svg>          
-        <span class="text-2xl">Voucher List</span>
-   </span>
-
-    <div>
-        <button (click)="openVoucherDialog()" class="button" type="button">Create New Voucher</button>
-    </div>    
-</div>
-
-<div class="flex flex-col">
-<div class="-m-1.5 overflow-x-auto">
-<div class="py-1.5 px-3 min-w-full inline-block align-middle">
-<div class="overflow-y-scroll mt-8 relative" style="height: 70vh;">
-<table class="table" >
-    <thead>
-        <tr class="scroll-table-row">
-            <th scope="col" class="table-header">No</th>
-            <th scope="col" class="table-header">Date</th>
-            <th scope="col" class="table-header">Fees</th>
-            <th scope="col" class="table-header">Expenses</th>
-            <th scope="col" class="table-header">Net Profit</th>
-            <th scope="col" class="table-header">Vouchers</th>
-            <th scope="col" class="table-header-text-end">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @for (item of voucherList(); track $index) {
-            <tr>
-                <td scope="col" class="table-data">{{ $index + 1 }}</td>
-                <td scope="col" class="table-data">{{ item.date }}</td>
-                <td scope="col" class="table-data">{{ item.fees }}</td>
-                <td scope="col" class="table-data">{{ item.expenses }}</td>
-                <td scope="col" class="table-data">{{ item.netProfit }} </td>
-                <td scope="col" class="table-data">{{ item.vouchers }} </td>
-                <td scope="col" class="table-data-action">
-                    <a [routerLink]="['/voucher', item.date]" routerLinkActive="router-link-active"  class="action-button">Details</a>
-                </td>
+@if (loading()) {
+    <app-loading-page></app-loading-page>
+} @else {
+    <div class="flex justify-between">
+        <span class="flex gap-1 items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+            </svg>          
+            <span class="text-2xl">Voucher List</span>
+       </span>
+    
+        <div>
+            <button (click)="openVoucherDialog()" class="button" type="button">Create New Voucher</button>
+        </div>    
+    </div>
+    
+    <div class="flex flex-col">
+    <div class="-m-1.5 overflow-x-auto">
+    <div class="py-1.5 px-3 min-w-full inline-block align-middle">
+    <div class="scroll-table-container">
+    <table class="table" >
+        <thead>
+            <tr class="sticky-table-header">
+                <th scope="col" class="table-header">No</th>
+                <th scope="col" class="table-header">Date</th>
+                <th scope="col" class="table-header">Fees</th>
+                <th scope="col" class="table-header">Expenses</th>
+                <th scope="col" class="table-header">Net Profit</th>
+                <th scope="col" class="table-header">Vouchers</th>
+                <th scope="col" class="table-header-text-end">Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
+        </thead>
+        <tbody>
+            @for (item of voucherList(); track $index) {
+                <tr>
+                    <td scope="col" class="table-data">{{ $index + 1 }}</td>
+                    <td scope="col" class="table-data">{{ item.date }}</td>
+                    <td scope="col" class="table-data">{{ item.fees }}</td>
+                    <td scope="col" class="table-data">{{ item.expenses }}</td>
+                    <td scope="col" class="table-data">{{ item.netProfit }} </td>
+                    <td scope="col" class="table-data">{{ item.vouchers }} </td>
+                    <td scope="col" class="table-data-action">
+                        <a [routerLink]="['/voucher', item.date]" routerLinkActive="router-link-active"  class="action-button">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+    </div>
+    </div>
+    </div>
+    
+}

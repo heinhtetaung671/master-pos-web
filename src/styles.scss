@@ -45,6 +45,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
    @apply min-w-full divide-y divide-gray-200 dark:divide-neutral-700;  
 }
 
-.scroll-table-row {
+.scroll-table-container {
+    @apply overflow-y-scroll mt-8 relative;
+    height: 70vh;
+}
+
+.sticky-table-header {
     @apply top-0 sticky bg-white;
 }

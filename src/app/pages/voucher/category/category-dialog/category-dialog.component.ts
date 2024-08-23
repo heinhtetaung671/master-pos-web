@@ -37,6 +37,7 @@ export class CategoryDialogComponent {
     if(this.form.valid) {
       this.service.create(this.form.value).subscribe(result => {
         console.log(result)
+        this.dialogRef.close();
       });
     }
   }

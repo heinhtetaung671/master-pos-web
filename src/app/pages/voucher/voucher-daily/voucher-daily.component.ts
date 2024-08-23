@@ -3,12 +3,13 @@ import { VoucherDialogComponent } from '../voucher-dialog/voucher-dialog.compone
 import { MatDialog } from '@angular/material/dialog';
 import { VoucherService } from '../../../services/voucher.service';
 import { RouterModule } from '@angular/router';
+import { WidgetsModule } from '../../../widgets/widgets.module';
 
 
 @Component({
   selector: 'app-voucher-daily',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, WidgetsModule],
   templateUrl: './voucher-daily.component.html',
 })
 export class VoucherDailyComponent {
@@ -16,6 +17,7 @@ export class VoucherDailyComponent {
   readonly voucherDialog = inject(MatDialog);
   readonly service = inject(VoucherService);
   
+  loading = signal<boolean>(true);
   voucherList = signal<any>([]);
 
   constructor() {
@@ -30,15 +32,29 @@ export class VoucherDailyComponent {
   }
 
   search() {
+    this.showLoadingPage();
     this.service.search({}).subscribe(result => {
       this.voucherList.set(result);
+      this.hideLoadingPage();
     })
   }
 
-  refresh() {
-    this.service.search({}).subscribe(result => {
-      this.voucherList.set(result);
+  refresh() { 
+    this.showLoadingPage();
+    this.service.search({}).subscribe({
+      next: result => {
+        this.voucherList.set(result);
+        this.hideLoadingPage()
+      }
     })
+  }
+
+  showLoadingPage() {
+    this.loading.set(true);
+  }
+
+  hideLoadingPage() {
+    this.loading.set(false);
   }
   
 }
