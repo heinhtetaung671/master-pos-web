@@ -11,8 +11,9 @@ import { VoucherService } from '../../../services/voucher.service';
 import { CategoryService } from '../../../services/category.service';
 import { MatSelectModule} from '@angular/material/select';
 import { MatBottomSheet, MatBottomSheetModule } from '@angular/material/bottom-sheet';
-import { WidgetsModule } from '../../../widgets/widgets.module';
+import {MatProgressBarModule, ProgressBarMode} from '@angular/material/progress-bar';
 import { MsgBottomSheetComponent } from '../../../widgets/msg-bottom-sheet/msg-bottom-sheet.component';
+import { MsgBottomSheetStatus } from '../../../types/types';
 
 @Component({
   selector: 'app-voucher-dialog',
@@ -20,7 +21,7 @@ import { MsgBottomSheetComponent } from '../../../widgets/msg-bottom-sheet/msg-b
   providers: [provideNativeDateAdapter()],
   imports: [MatDialogActions, MatDialogContent, MatFormFieldModule,
       MatDatepickerModule, MatInputModule, MatDialogTitle, ReactiveFormsModule,
-      MatSelectModule ],
+      MatSelectModule, MatProgressBarModule ],
   templateUrl: './voucher-dialog.component.html',
   styles: ``
 })
@@ -34,6 +35,8 @@ export class VoucherDialogComponent {
   form: FormGroup | undefined = undefined;
   date: any | undefined;
   categorySelectDataList = signal<any>([]);
+  progressBarClass = signal<'hidden' | 'block'>('hidden');
+  
 
   constructor(fb: FormBuilder) {
 
@@ -58,18 +61,16 @@ export class VoucherDialogComponent {
   }
 
   create() {
-    console.log(this.form?.value);
-    if(this.form?.valid) {
-      this.service.create(this.form.value).subscribe({
+    this.progressBarClass.set('block');
+      this.service.create(this.form!.value).subscribe({
         next: result => {
-        console.log(result);
-      }, 
+          this.openMsgBottomSheet('success', 'Success', [`${result.customerName} has been created successfully!`])
+          this.dialogRef.close();
+      },
       error: error => {
-        this.openMsgBottomSheet(error);
+        this.openMsgBottomSheet('error', 'Error', error.error.errorMessages);
       }
     });
-    }
-      
   }
 
   loadCategorySelectData() {
@@ -80,8 +81,8 @@ export class VoucherDialogComponent {
     });
   }
 
-  openMsgBottomSheet(msg: string) {
-    this.msgBottomSheet.open(MsgBottomSheetComponent, { data: msg });
+  openMsgBottomSheet(status: MsgBottomSheetStatus, title: string, msg: string[]) {
+    this.msgBottomSheet.open(MsgBottomSheetComponent, { data: { status: status, title: title, msg: msg}  });
   }
 
 }

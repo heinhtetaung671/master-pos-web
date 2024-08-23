@@ -20,14 +20,23 @@ export class VoucherComponent {
   voucherList = signal<any>([]);
 
   constructor() {
-    this.search();
+    this.refresh();
   }
 
   openVoucherDialog() {
-    this.voucherDialog.open(VoucherDialogComponent);
+   const voucherDialogRef = this.voucherDialog.open(VoucherDialogComponent);
+   voucherDialogRef.afterClosed().subscribe(value => {
+    this.refresh();
+   })
   }
 
   search() {
+    this.service.search({}).subscribe(result => {
+      this.voucherList.set(result);
+    })
+  }
+
+  refresh() {
     this.service.search({}).subscribe(result => {
       this.voucherList.set(result);
     })

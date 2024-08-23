@@ -3,6 +3,7 @@
         Voucher Create Form</span>
     <mat-dialog-content>
         <form [formGroup]="form!">
+
             <div class="mb-2">
                 <mat-form-field style="width: 100%;">
                     <mat-label>Customer Name</mat-label>
@@ -52,7 +53,7 @@
                     <input formControlName="date" matInput [matDatepicker]="date">
                     <mat-hint>MM/DD/YYYY</mat-hint>
                     <mat-datepicker-toggle [for]="date"></mat-datepicker-toggle>
-                    <mat-datepicker  #date></mat-datepicker>
+                    <mat-datepicker #date></mat-datepicker>
                 </mat-form-field>
         
                 <mat-form-field>
@@ -60,7 +61,11 @@
                     <textarea formControlName="remark" matInput></textarea>
                 </mat-form-field>
             </div>
-    
+
+            <div [class]="progressBarClass()">
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </div>
+
             <mat-dialog-actions>
                 <div class="flex gap-2">
                     <div>

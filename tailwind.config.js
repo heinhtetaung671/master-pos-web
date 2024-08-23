@@ -1,24 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ['selector', '[data-mode="dark"]'],
   content: [
     "./src/**/*.{html,ts}",
+    'node_modules/preline/dist/*.js',
   ],
     theme: {
-      extend: {
-        animation: {
-          slide: "slide 2.5s linear infinite",
-        },
-        keyframes: {
-          slide: {
-            "0%": { transform: "translateY(100%)", opacity: 0.1 },
-            "15%": { transform: "translateY(0)", opacity: 1 },
-            "30%": { transform: "translateY(0)", opacity: 1 },
-            "45%": { transform: "translateY(-100%)", opacity: 1 },
-            "100%": { transform: "translateY(-100%)", opacity: 0.1 },
-          },
-        },
-      },
   },
-  plugins: [],
+  plugins: [
+    require('preline/plugin'),  ],
 }
 
