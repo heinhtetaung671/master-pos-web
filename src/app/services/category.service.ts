@@ -26,7 +26,7 @@ export class CategoryService {
   }
 
   loadDataForSelect() {
-    return this.http.get(`${BASE_URL}/load-data-for-select`);
+    return this.http.get<any>(`${BASE_URL}/load-data-for-select`);
   }
 
 }

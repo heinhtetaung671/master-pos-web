@@ -44,3 +44,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .table {
    @apply min-w-full divide-y divide-gray-200 dark:divide-neutral-700;  
 }
+
+.scroll-table-row {
+    @apply top-0 sticky bg-white;
+}

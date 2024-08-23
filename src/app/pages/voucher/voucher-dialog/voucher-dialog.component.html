@@ -31,11 +31,12 @@
                 <div>
                     <mat-form-field>
                         <mat-label>Category</mat-label>
-                        <mat-select formControlName="categoryId">
-                            @for (item of categorySelectDataList(); track $index) {
+                        <input #categoryInput (input)="refreshCategorySelectOptionList(categoryInput.value)"  type="text" formControlName="categoryId" matInput [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                            @for (item of filteredCategorySelectOptionList(); track $index) {
                                 <mat-option [value]="item.id">{{ item.name }}</mat-option>
                             }
-                        </mat-select>
+                        </mat-autocomplete>
                     </mat-form-field>
                 </div>
 

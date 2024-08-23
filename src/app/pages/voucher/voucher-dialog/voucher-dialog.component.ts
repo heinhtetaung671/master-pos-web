@@ -14,7 +14,7 @@ import { MatBottomSheet, MatBottomSheetModule } from '@angular/material/bottom-s
 import {MatProgressBarModule, ProgressBarMode} from '@angular/material/progress-bar';
 import { MsgBottomSheetComponent } from '../../../widgets/msg-bottom-sheet/msg-bottom-sheet.component';
 import { MsgBottomSheetStatus } from '../../../types/types';
-import { DatePipe } from '@angular/common';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-voucher-dialog',
@@ -22,7 +22,7 @@ import { DatePipe } from '@angular/common';
   providers: [provideNativeDateAdapter()],
   imports: [MatDialogActions, MatDialogContent, MatFormFieldModule,
       MatDatepickerModule, MatInputModule, MatDialogTitle, ReactiveFormsModule,
-      MatSelectModule, MatProgressBarModule ],
+      MatSelectModule, MatProgressBarModule, MatAutocompleteModule ],
   templateUrl: './voucher-dialog.component.html',
   styles: ``
 })
@@ -34,9 +34,9 @@ export class VoucherDialogComponent {
   readonly msgBottomSheet = inject(MatBottomSheet);
 
   form: FormGroup | undefined = undefined;
-  categorySelectDataList = signal<any>([]);
+  categorySelectOptionList = signal<{id: string, name: string}[] | undefined>(undefined);
   progressBarClass = signal<'hidden' | 'block'>('hidden');
-  
+  filteredCategorySelectOptionList = signal<any>([]);
   
   constructor(fb: FormBuilder) {
 
@@ -49,7 +49,7 @@ export class VoucherDialogComponent {
       remark: ''
     });
 
-    this.loadCategorySelectData();
+    this.loadCategorySelectOption();
   }
 
   closeDialog() {
@@ -72,12 +72,6 @@ export class VoucherDialogComponent {
     return null;
   }
 
-  changeFormDateFormat(event: any) {
-    console.log(event.value);
-    this.form?.patchValue({ date: this.formatDate(event.value)});
-    console.log(this.form?.value);
-  }
-
   create() {
     this.progressBarClass.set('block');
       this.service.create(this.form!.value).subscribe({
@@ -91,12 +85,23 @@ export class VoucherDialogComponent {
     });
   }
 
-  loadCategorySelectData() {
+  loadCategorySelectOption() {
     this.categoryService.loadDataForSelect().subscribe( {
       next: result => {
-        this.categorySelectDataList.set(result)
+        this.categorySelectOptionList!.set(result);
+        this.filteredCategorySelectOptionList.set(result);
       }
     });
+  }
+
+  changeFormDateFormat(event: any) {
+    console.log(event.value);
+    this.form?.patchValue({ date: this.formatDate(event.value)});
+    console.log(this.form?.value);
+  }
+
+  refreshCategorySelectOptionList(inputValue: any) {
+    this.filteredCategorySelectOptionList.set(this.categorySelectOptionList()!.filter( option => option.name.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())));
   }
 
   openMsgBottomSheet(status: MsgBottomSheetStatus, title: string, msg: string[]) {
