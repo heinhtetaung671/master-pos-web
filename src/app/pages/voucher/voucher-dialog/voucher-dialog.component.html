@@ -50,7 +50,7 @@
             <div class="flex gap-2 align-top mb-4">
                 <mat-form-field>
                     <mat-label>Date</mat-label>
-                    <input formControlName="date" matInput [matDatepicker]="date">
+                    <input (dateChange)="changeFormDateFormat($event)" formControlName="date" matInput [matDatepicker]="date">
                     <mat-hint>MM/DD/YYYY</mat-hint>
                     <mat-datepicker-toggle [for]="date"></mat-datepicker-toggle>
                     <mat-datepicker #date></mat-datepicker>

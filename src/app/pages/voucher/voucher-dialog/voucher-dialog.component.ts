@@ -14,6 +14,7 @@ import { MatBottomSheet, MatBottomSheetModule } from '@angular/material/bottom-s
 import {MatProgressBarModule, ProgressBarMode} from '@angular/material/progress-bar';
 import { MsgBottomSheetComponent } from '../../../widgets/msg-bottom-sheet/msg-bottom-sheet.component';
 import { MsgBottomSheetStatus } from '../../../types/types';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-voucher-dialog',
@@ -33,11 +34,10 @@ export class VoucherDialogComponent {
   readonly msgBottomSheet = inject(MatBottomSheet);
 
   form: FormGroup | undefined = undefined;
-  date: any | undefined;
   categorySelectDataList = signal<any>([]);
   progressBarClass = signal<'hidden' | 'block'>('hidden');
   
-
+  
   constructor(fb: FormBuilder) {
 
     this.form = fb.group({
@@ -45,7 +45,7 @@ export class VoucherDialogComponent {
       categoryId: '',
       fees: [0, Validators.required],
       expenses: 0,
-      date: Date,
+      date: '',
       remark: ''
     });
 
@@ -60,8 +60,25 @@ export class VoucherDialogComponent {
     return this.form?.get('fees')?.value - this.form?.get('expenses')?.value;
   }
 
+  formatDate(orgDate: Date) {
+    if(orgDate) {
+      let tempMonth = orgDate.getMonth() + 1;
+
+      let year = orgDate.getFullYear();
+      let month = tempMonth < 9 ? `0${tempMonth}`: tempMonth;
+      let date = orgDate.getDate() < 9 ? `0${orgDate.getDate()}` : orgDate.getDate();
+      return `${year}-${month}-${date}`;
+    }
+    return null;
+  }
+
+  changeFormDateFormat(event: any) {
+    console.log(event.value);
+    this.form?.patchValue({ date: this.formatDate(event.value)});
+    console.log(this.form?.value);
+  }
+
   create() {
-    console.log(this.form?.value)
     this.progressBarClass.set('block');
       this.service.create(this.form!.value).subscribe({
         next: result => {
