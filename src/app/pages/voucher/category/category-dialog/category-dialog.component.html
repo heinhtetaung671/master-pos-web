@@ -20,7 +20,7 @@
         </div>
         <mat-dialog-actions>
             <div class="flex gap-2">
-                <button type="button" class="button-green">Create</button>
+                <button (click)="create()" [disabled]="form.invalid" type="button" class="button-green">Create</button>
                 <button (click)="closeDialog()" type="button" class="button-red">Cancel</button>
             </div>
         </mat-dialog-actions>

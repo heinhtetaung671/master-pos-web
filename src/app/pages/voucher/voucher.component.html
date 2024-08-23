@@ -12,6 +12,41 @@
                 <button (click)="openVoucherDialog()" class="button" type="button">Create New Voucher</button>
             </div>    
         </div>
+
+        <div class="flex flex-col">
+  <div class="-m-1.5 overflow-x-auto">
+    <div class="py-1.5 px-3 min-w-full inline-block align-middle">
+      <div class="overflow-hidden">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col" class="table-header">No</th>
+                    <th scope="col" class="table-header">Date</th>
+                    <th scope="col" class="table-header">Fees</th>
+                    <th scope="col" class="table-header">Expenses</th>
+                    <th scope="col" class="table-header">Net Profit</th>
+                    <th scope="col" class="table-header-text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of voucherList(); track $index) {
+                    <tr>
+                        <td scope="col" class="table-data">{{ $index + 1 }}</td>
+                        <td scope="col" class="table-data">{{ item.date }}</td>
+                        <td scope="col" class="table-data">{{ item.fees }}</td>
+                        <td scope="col" class="table-data">{{ item.expenses }}</td>
+                        <td scope="col" class="table-data">{{ item.netProfit }} </td>
+                        <td scope="col" class="table-data-action">
+                            <button class="action-button">Edit</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+    </div>
     </div>
     <div class="col-span-4">
         <app-category></app-category>

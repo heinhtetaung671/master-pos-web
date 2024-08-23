@@ -1,0 +1,23 @@
+.table-header {
+    @apply px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase;
+}
+
+.table-header-text-end {
+    @apply px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase;
+}
+
+.table-data {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-800;
+}
+
+.table-data-action {
+    @apply px-6 py-4 whitespace-nowrap text-end text-sm font-medium;
+}
+
+.action-button {
+    @apply inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-none focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.table {
+   @apply min-w-full divide-y divide-gray-200 dark:divide-neutral-700 mt-8;  
+}

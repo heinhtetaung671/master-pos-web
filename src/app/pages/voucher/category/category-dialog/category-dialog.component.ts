@@ -5,6 +5,7 @@ import { MatDialogContent } from '@angular/material/dialog';
 import { MatDialogTitle } from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
+import { CategoryService } from '../../../../services/category.service';
 
 
 @Component({
@@ -17,6 +18,8 @@ import {MatInputModule} from '@angular/material/input';
 export class CategoryDialogComponent {
 
   readonly dialogRef = inject(MatDialogRef<CategoryDialogComponent>);
+  readonly service = inject(CategoryService);
+
   form :FormGroup;
 
   constructor( fb: FormBuilder) {
@@ -28,6 +31,14 @@ export class CategoryDialogComponent {
 
   closeDialog() {
     this.dialogRef.close();
+  }
+
+  create() {
+    if(this.form.valid) {
+      this.service.create(this.form.value).subscribe(result => {
+        console.log(result)
+      });
+    }
   }
   
 }
