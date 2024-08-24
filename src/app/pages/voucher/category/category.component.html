@@ -10,3 +10,38 @@
         <button (click)="openCategoryDialog()" type="button" class="button">Create New Category</button>
     </span>
 </div>
+
+@if (loading()) {
+    <app-loading-page></app-loading-page>
+} @else {
+    <div class="flex flex-col">
+        <div class="-m-1.5 p-1.5 px-3 min-w-full inline-block align-middle overflow-x-auto">
+            <div class="scroll-table-container">
+                <table class="table">
+                    <thead>
+                        <tr class="sticky-table-header">
+                            <th class="table-header">No</th>
+                            <th class="table-header">Name</th>
+                            <th class="table-header">Description</th>
+                            <th class="table-header">Voucher</th>
+                            <th class="table-header">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of list(); let idx = $index; track idx) {
+                            <tr>
+                                <td class="table-data">{{ idx + 1 }}</td>
+                                <td class="table-data">{{ item.name }}</td>
+                                <td class="table-data">{{ item.description }}</td>
+                                <td class="table-data">{{ item.vouchers }}</td>
+                                <td class="table-data">
+                                    <button class="action-button" type="button">Edit</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

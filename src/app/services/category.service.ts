@@ -14,11 +14,11 @@ export class CategoryService {
   constructor() { }
 
   search(search: any) {
-    return this.http.get(BASE_URL, { params: search});
+    return this.http.get<any>(BASE_URL, { params: search});
   }
 
   create(form: any) {
-    return this.http.post(BASE_URL, form);
+    return this.http.post<any>(BASE_URL, form);
   }
 
   update(id: any, form: any) {

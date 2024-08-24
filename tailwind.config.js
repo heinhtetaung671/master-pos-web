@@ -4,6 +4,7 @@ module.exports = {
   content: [
     "./src/**/*.{html,ts}",
     'node_modules/preline/dist/*.js',
+    "lib/*.js"
   ],
     theme: {
   },

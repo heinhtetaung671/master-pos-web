@@ -33,7 +33,7 @@ export class CategoryDialogComponent {
     this.dialogRef.close();
   }
 
-  create() {
+  save() {
     if(this.form.valid) {
       this.service.create(this.form.value).subscribe(result => {
         console.log(result)

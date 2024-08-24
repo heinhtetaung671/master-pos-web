@@ -98,10 +98,8 @@ export class VoucherDialogComponent {
     });
   }
 
-  changeFormDateFormat(event: any) {
-    console.log(event.value);
-    this.form?.patchValue({ date: this.formatDate(event.value)});
-    console.log(this.form?.value);
+  changeFormDateFormat(date: any) {
+    this.form?.patchValue({ date: this.formatDate(date)});
   }
 
   refreshCategorySelectOptionList(inputValue: any) {
