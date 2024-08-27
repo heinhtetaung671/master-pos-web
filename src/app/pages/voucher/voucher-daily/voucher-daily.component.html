@@ -37,7 +37,7 @@
                     <td scope="col" class="table-data">{{ item.date }}</td>
                     <td scope="col" class="table-data">{{ item.fees }}</td>
                     <td scope="col" class="table-data">{{ item.expenses }}</td>
-                    <td scope="col" class="table-data">{{ item.netProfit }} </td>
+                    <td scope="col" class="table-data "><span class="text-green-500 font-semibold">{{ item.netProfit }}</span> </td>
                     <td scope="col" class="table-data">{{ item.vouchers }} </td>
                     <td scope="col" class="table-data-action">
                         <a [routerLink]="['/voucher', item.date]" routerLinkActive="router-link-active"  class="action-button">Details</a>

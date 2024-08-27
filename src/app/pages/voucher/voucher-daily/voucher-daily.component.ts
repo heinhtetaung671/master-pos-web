@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { VoucherDialogComponent } from '../voucher-dialog/voucher-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { VoucherService } from '../../../services/voucher.service';
 import { RouterModule } from '@angular/router';
 import { WidgetsModule } from '../../../widgets/widgets.module';
+import { isNotAListOrEmptyList } from '../../../utils/utility';
 
 
 @Component({
@@ -17,8 +18,8 @@ export class VoucherDailyComponent {
   readonly voucherDialog = inject(MatDialog);
   readonly service = inject(VoucherService);
   
-  loading = signal<boolean>(true);
-  voucherList = signal<any>([]);
+  loading = computed( () => isNotAListOrEmptyList(this.voucherList()) );
+  voucherList = signal<any[] | undefined>(undefined);
 
   constructor() {
     this.refresh();
@@ -26,35 +27,23 @@ export class VoucherDailyComponent {
 
   openVoucherDialog() {
    const voucherDialogRef = this.voucherDialog.open(VoucherDialogComponent);
-   voucherDialogRef.afterClosed().subscribe(value => {
+   voucherDialogRef.afterClosed().subscribe( _ => {
     this.refresh();
    })
   }
 
   search() {
-    this.showLoadingPage();
     this.service.search({}).subscribe(result => {
       this.voucherList.set(result);
-      this.hideLoadingPage();
     })
   }
 
   refresh() { 
-    this.showLoadingPage();
     this.service.search({}).subscribe({
       next: result => {
         this.voucherList.set(result);
-        this.hideLoadingPage()
       }
     })
   }
 
-  showLoadingPage() {
-    this.loading.set(true);
-  }
-
-  hideLoadingPage() {
-    this.loading.set(false);
-  }
-  
 }

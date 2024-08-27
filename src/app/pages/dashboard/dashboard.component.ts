@@ -2,6 +2,8 @@ import { AfterViewInit, Component, inject, OnInit, PLATFORM_ID, signal } from '@
 import { WidgetsModule } from '../../widgets/widgets.module';
 import { Platform } from '@angular/cdk/platform';
 import { isPlatformBrowser } from '@angular/common';
+import { DashboardService } from '../../services/dashboard.service';
+import { After } from 'node:v8';
 
 
 declare function buildTooltip(props: any, options: any): void;
@@ -19,226 +21,66 @@ declare function buildTooltipForDonut(props: any, arg1: any): void;
   templateUrl: './dashboard.component.html',
   styles: ``
 })
-export class DashboardComponent implements OnInit{
+export class DashboardComponent implements OnInit, AfterViewInit{
   
   loading = signal<boolean>(false);
 
   readonly platformId = inject(PLATFORM_ID);
+  readonly service = inject(DashboardService);
+
+  categoryPieChartLabel = signal<string[]>([]);
+  categoryPieChartData = signal<any>([]);
+
+  voucherFeesData = signal<any>([]);
+  voucherExpenseData = signal<any>([]);
+
+  voucherCategory = signal<any>([]);
+
+  voucherDashboard = signal<any>(undefined);
 
   constructor() {
- 
+    this.service.searchCategoryVoucherMonthly(2024, 'AUGUST').subscribe({
+      next: result => {
+        this.categoryPieChartLabel.set(result.map((value: any) => value.categoryName));
+        this.categoryPieChartData.set(result.map((value: any) => value.vouchers));
+        console.log(this.categoryPieChartData());
+        console.log(this.categoryPieChartLabel());
+      }
+    });
+
+    this.service.searchCategoryVoucherYearly(2024).subscribe({
+      next: result => {
+        console.log(result)
+      }
+    })
+
+    this.service.searchVoucherMonthly(2024, 'AUGUST').subscribe({
+      next: result => {
+        this.voucherCategory.set(result.map((value: any) => value.label))
+        this.voucherFeesData.set(result.map((value: any) => value.fees))
+        this.voucherExpenseData.set(result.map((value: any) => value.expenses))
+        console.log(result)
+      }
+    })
+  }
+
+  ngAfterViewInit(): void {
+
+    console.log(this.voucherDashboard());
+
+    if(!this.voucherDashboard()) {
+      this.voucherDashboard.set(this.buildVoucherDashboard());
+    }
   }
 
   ngOnInit(): void {
+
       if(isPlatformBrowser(this.platformId)) {
-        buildChart('#hs-multiple-area-charts-compare-two-tooltip', (mode: any) => ({
-          chart: {
-            height: 300,
-            type: 'area',
-            toolbar: {
-              show: false
-            },
-            zoom: {
-              enabled: false
-            }
-          },
-          series: [
-            {
-              name: '2023',
-              data: [18000, 51000, 60000, 38000, 88000, 50000, 40000, 52000, 88000, 80000, 60000, 70000]
-            },
-            {
-              name: '2022',
-              data: [27000, 38000, 60000, 77000, 40000, 50000, 49000, 29000, 42000, 27000, 42000, 50000]
-            }
-          ],
-          legend: {
-            show: true
-          },
-          dataLabels: {
-            enabled: true
-          },
-          stroke: {
-            curve: 'straight',
-            width: 2
-          },
-          grid: {
-            strokeDashArray: 2
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              type: 'vertical',
-              shadeIntensity: 1,
-              opacityFrom: 0.1,
-              opacityTo: 0.8
-            }
-          },
-          xaxis: {
-            type: 'category',
-            tickPlacement: 'on',
-            categories: [
-              '15 January',
-              '15 February',
-              '15 March',
-              '15 April',
-              '15 May',
-              '15 June',
-              '15 July',
-              '15 August',
-              '15 September',
-              '15 October',
-              '15 November',
-              '15 December'
-            ],
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            crosshairs: {
-              stroke: {
-                dashArray: 0
-              },
-              dropShadow: {
-                show: false
-              }
-            },
-            tooltip: {
-              enabled: false
-            },
-            labels: {
-              style: {
-                fontSize: '13px',
-                fontFamily: 'Inter, ui-sans-serif',
-                fontWeight: 400
-              },
-              formatter: (title: any) => {
-                let t = title;
-    
-                if (t) {
-                  const newT = t.split(' ');
-                  t = `${newT[1].slice(0, 3)}`;
-                }
-    
-                return t;
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              align: 'left',
-              minWidth: 0,
-              maxWidth: 140,
-              style: {
-                fontSize: '13px',
-                fontFamily: 'Inter, ui-sans-serif',
-                fontWeight: 400
-              },
-              formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
-            }
-          },
-          tooltip: {
-            x: {
-              format: 'MMMM yyyy'
-            },
-            y: {
-              formatter: (value: number) => `$${value >= 1000 ? `${value / 1000}k` : value}`
-            },
-            custom: function (props: any) {
-              return buildTooltipCompareTwo(props, {
-                title: 'Revenue',
-                mode,
-                hasTextLabel: true,
-                wrapperExtClasses: 'min-w-48',
-                markerExtClasses: '!rounded-sm'
-              });
-            }
-          },
-          responsive: [{
-            breakpoint: 568,
-            options: {
-              chart: {
-                height: 300
-              },
-              labels: {
-                style: {
-                  colors: '#9ca3af',
-                  fontSize: '11px',
-                  fontFamily: 'Inter, ui-sans-serif',
-                  fontWeight: 400
-                },
-                offsetX: -2,
-                formatter: (title: string | any[]) => title.slice(0, 3)
-              },
-              yaxis: {
-                labels: {
-                  align: 'left',
-                  minWidth: 0,
-                  maxWidth: 140,
-                  style: {
-                    colors: '#9ca3af',
-                    fontSize: '11px',
-                    fontFamily: 'Inter, ui-sans-serif',
-                    fontWeight: 400
-                  },
-                  formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
-                }
-              },
-            },
-          }]
-        }), {
-          colors: ['#2563eb', '#9333ea'],
-          fill: {
-            gradient: {
-              stops: [0, 90, 100]
-            }
-          },
-          xaxis: {
-            labels: {
-              style: {
-                colors: '#9ca3af'
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              style: {
-                colors: '#9ca3af'
-              }
-            }
-          },
-          grid: {
-            borderColor: '#e5e7eb'
-          }
-        }, {
-          colors: ['#3b82f6', '#a855f7'],
-          fill: {
-            gradient: {
-              stops: [100, 90, 0]
-            }
-          },
-          xaxis: {
-            labels: {
-              style: {
-                colors: '#a3a3a3',
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              style: {
-                colors: '#a3a3a3'
-              }
-            }
-          },
-          grid: {
-            borderColor: '#404040'
-          }
-        });   
-      
-  
+
+        if(!this.voucherDashboard()) {
+          this.voucherDashboard.set(this.buildVoucherDashboard())
+        }
+
         buildChart('#hs-single-area', (mode: any) => ({
           chart: {
             height: 320,
@@ -463,8 +305,8 @@ export class DashboardComponent implements OnInit{
               enabled: false
             }
           },
-          series: [70, 18, 12],
-          labels: ['Direct', 'Organic search', 'Referral'],
+          series: this.categoryPieChartData(),
+          labels: this.categoryPieChartLabel(),
           title: {
             show: false
           },
@@ -590,6 +432,208 @@ export class DashboardComponent implements OnInit{
 
 
 
+
+    buildVoucherDashboard() {
+
+      
+
+      return buildChart('#voucher-dashboard', (mode: any) => ({
+          chart: {
+            height: 300,
+            type: 'area',
+            toolbar: {
+              show: false
+            },
+            zoom: {
+              enabled: false
+            }
+          },
+          series: [
+            {
+              name: 'Fees',
+              data: this.voucherFeesData()
+            },
+            {
+              name: 'Expenses',
+              data: this.voucherExpenseData()
+            }
+          ],
+          legend: {
+            show: true
+          },
+          dataLabels: {
+            enabled: true
+          },
+          stroke: {
+            curve: 'straight',
+            width: 2
+          },
+          grid: {
+            strokeDashArray: 2
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              type: 'vertical',
+              shadeIntensity: 1,
+              opacityFrom: 0.1,
+              opacityTo: 0.8
+            }
+          },
+          xaxis: {
+            type: 'category',
+            tickPlacement: 'on',
+            categories: this.voucherCategory(),
+            axisBorder: {
+              show: false
+            },
+            axisTicks: {
+              show: false
+            },
+            crosshairs: {
+              stroke: {
+                dashArray: 0
+              },
+              dropShadow: {
+                show: false
+              }
+            },
+            tooltip: {
+              enabled: false
+            },
+            labels: {
+              style: {
+                colors: '#9ca3af',
+                fontSize: '13px',
+                fontFamily: 'Inter, ui-sans-serif',
+                fontWeight: 400
+              },
+              formatter: (title: any) => {
+                let t = title;
+
+                return t;
+              }
+            }
+          },
+          yaxis: {
+            labels: {
+              align: 'left',
+              minWidth: 0,
+              maxWidth: 140,
+              style: {
+                colors: '#9ca3af',
+                fontSize: '13px',
+                fontFamily: 'Inter, ui-sans-serif',
+                fontWeight: 400
+              },
+              formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
+            }
+          },
+          tooltip: {
+            x: {
+              format: 'MMMM yyyy'
+            },
+            y: {
+              formatter: (value: number) => `$${value >= 1000 ? `${value / 1000}k` : value}`
+            },
+            custom: function (props: { ctx?: any; dataPointIndex?: any; }) {
+              const { categories } = props.ctx.opts.xaxis;
+              const { dataPointIndex } = props;
+              const title = categories[dataPointIndex].split(' ');
+              const newTitle = `${title[0]} ${title[1]}`;
+
+              return buildTooltip(props, {
+                title: newTitle,
+                mode,
+                hasTextLabel: true,
+                wrapperExtClasses: 'min-w-28',
+                labelDivider: ':',
+                labelExtClasses: 'ms-2'
+              });
+            }
+          },
+          responsive: [{
+            breakpoint: 568,
+            options: {
+              chart: {
+                height: 300
+              },
+              labels: {
+                style: {
+                  colors: '#9ca3af',
+                  fontSize: '11px',
+                  fontFamily: 'Inter, ui-sans-serif',
+                  fontWeight: 400
+                },
+                offsetX: -2,
+                formatter: (title: string | any[]) => title.slice(0, 3)
+              },
+              yaxis: {
+                labels: {
+                  align: 'left',
+                  minWidth: 0,
+                  maxWidth: 140,
+                  style: {
+                    colors: '#9ca3af',
+                    fontSize: '11px',
+                    fontFamily: 'Inter, ui-sans-serif',
+                    fontWeight: 400
+                  },
+                  formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
+                }
+              },
+            },
+          }]
+        }), {
+          colors: ['#2563eb', '#9333ea'],
+          fill: {
+            gradient: {
+              stops: [0, 90, 100]
+            }
+          },
+          xaxis: {
+            labels: {
+              style: {
+                colors: '#9ca3af'
+              }
+            }
+          },
+          yaxis: {
+            labels: {
+              style: {
+                colors: '#9ca3af'
+              }
+            }
+          },
+          grid: {
+            borderColor: '#e5e7eb'
+          }
+        }, {
+          colors: ['#3b82f6', '#a855f7'],
+          fill: {
+            gradient: {
+              stops: [100, 90, 0]
+            }
+          },
+          xaxis: {
+            labels: {
+              style: {
+                colors: '#a3a3a3',
+              }
+            }
+          },
+          yaxis: {
+            labels: {
+              style: {
+                colors: '#a3a3a3'
+              }
+            }
+          },
+          grid: {
+            borderColor: '#404040'
+          }
+    });
+    }
   
 
 }

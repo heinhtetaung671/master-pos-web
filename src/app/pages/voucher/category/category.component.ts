@@ -1,10 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { CategoryDialogComponent } from './category-dialog/category-dialog.component';
 import { CategoryService } from '../../../services/category.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { LoadingPageComponent } from '../../../widgets/loading-page/loading-page.component';
 import { WidgetsModule } from '../../../widgets/widgets.module';
+import { isNotAListOrEmptyList } from '../../../utils/utility';
 
 @Component({
   selector: 'app-category',
@@ -19,37 +20,38 @@ export class CategoryComponent {
 
   form: FormGroup;
   service = inject(CategoryService);
-  list = signal<any[]>([]);
-  loading = signal<boolean>(true);
+  list = signal<any[] | undefined>(undefined);
+  loading = computed( () => isNotAListOrEmptyList(this.list()) ); 
 
   openCategoryDialog() {
     let categoryDialogRef = this.categoryDialog.open(CategoryDialogComponent);
+    categoryDialogRef.afterClosed().subscribe( _ => {
+      this.refresh();
+    })
   }
 
   constructor(fb: FormBuilder) {
-
     this.form = fb.group({
       keyword: ''
     });
 
-    this.search();
+    this.refresh();
   }
 
   search() {
-    this.showLoadingPage();
     this.service.search(this.form.value).subscribe({
       next: result => {
         this.list.set(result);
-        this.hideLoadingPage();
       }
     })
   }
 
-  showLoadingPage() {
-    this.loading.set(true);
-  }
+  refresh() {
+    this.service.search({}).subscribe({
+      next: result => {
+        this.list.set(result);
 
-  hideLoadingPage() {
-    this.loading.set(false)
+      }
+    })
   }
 }
