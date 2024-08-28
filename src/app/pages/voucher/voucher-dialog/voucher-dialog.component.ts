@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { MatDialogActions, MatDialogRef } from '@angular/material/dialog';
 import { MatDialogContent } from '@angular/material/dialog';
 import { MatDialogTitle } from '@angular/material/dialog';
@@ -36,7 +36,6 @@ export class VoucherDialogComponent {
   form: FormGroup | undefined = undefined;
   categorySelectOptionList = signal<{id: string, name: string}[] | undefined>(undefined);
   progressBarClass = signal<'hidden' | 'block'>('hidden');
-  filteredCategorySelectOptionList = signal<any>([]);
   
   constructor(fb: FormBuilder) {
 
@@ -61,6 +60,7 @@ export class VoucherDialogComponent {
   }
 
   formatDate(orgDate: Date) {
+    console.log(orgDate)
     if(orgDate) {
       let tempMonth = orgDate.getMonth() + 1;
 
@@ -93,18 +93,14 @@ export class VoucherDialogComponent {
     this.categoryService.loadDataForSelect().subscribe( {
       next: result => {
         this.categorySelectOptionList!.set(result);
-        this.filteredCategorySelectOptionList.set(result);
       }
     });
   }
 
-  changeFormDateFormat(date: any) {
-    this.form?.patchValue({ date: this.formatDate(date)});
+  changeFormDateFormat(date?: any) {
+    this.form?.patchValue({ date: this.formatDate(this.form.get('date')?.value)});
   }
 
-  refreshCategorySelectOptionList(inputValue: any) {
-    this.filteredCategorySelectOptionList.set(this.categorySelectOptionList()!.filter( option => option.name.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())));
-  }
 
   openMsgBottomSheet(status: MsgBottomSheetStatus, title: string, msg: string[]) {
     this.msgBottomSheet.open(MsgBottomSheetComponent, { data: { status: status, title: title, msg: msg}  });

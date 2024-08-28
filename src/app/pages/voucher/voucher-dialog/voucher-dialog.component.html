@@ -31,12 +31,11 @@
                 <div>
                     <mat-form-field>
                         <mat-label>Category</mat-label>
-                        <input #categoryInput (input)="refreshCategorySelectOptionList(categoryInput.value)"  type="text" formControlName="categoryId" matInput [matAutocomplete]="auto">
-                        <mat-autocomplete #auto="matAutocomplete">
-                            @for (item of filteredCategorySelectOptionList(); track $index) {
+                        <mat-select  type="text" formControlName="categoryId">
+                            @for (item of categorySelectOptionList(); track $index) {
                                 <mat-option [value]="item.id">{{ item.name }}</mat-option>
                             }
-                        </mat-autocomplete>
+                        </mat-select>
                     </mat-form-field>
                 </div>
 
@@ -51,7 +50,7 @@
             <div class="flex gap-2 align-top mb-4">
                 <mat-form-field>
                     <mat-label>Date</mat-label>
-                    <input #date (dateChange)="changeFormDateFormat(date.value)" formControlName="date" matInput [matDatepicker]="datePicker">
+                    <input  (dateChange)="changeFormDateFormat()" formControlName="date" matInput [matDatepicker]="datePicker">
                     <mat-hint>MM/DD/YYYY</mat-hint>
                     <mat-datepicker-toggle [for]="datePicker"></mat-datepicker-toggle>
                     <mat-datepicker #datePicker></mat-datepicker>

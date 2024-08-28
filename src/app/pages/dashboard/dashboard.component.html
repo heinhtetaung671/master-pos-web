@@ -16,22 +16,35 @@
 
           <!-- Voucher Dashboard Go Here-->
           <div class="col-span-8">
-            <!-- Legend Indicator -->
-            <div class="flex justify-center sm:justify-end items-center gap-x-4 mb-3 sm:mb-6">
-              <div class="inline-flex items-center">
-                <span class="size-2.5 inline-block bg-blue-600 rounded-sm me-2"></span>
-                <span class="text-[13px] text-gray-600">
-                  Fees
-                </span>
-              </div>
-              <div class="inline-flex items-center">
-                <span class="size-2.5 inline-block bg-purple-600 rounded-sm me-2"></span>
-                <span class="text-[13px] text-gray-600">
-                  Expenses
-                </span>
+            <div class="flex justify-between items-center">
+              <span class="m-0 font-semibold text-2xl">Voucher Dashboard</span>
+
+              <div>
+                <form [formGroup]="voucherDashboardMonthlyForm" class="flex gap-1.5 place-items-center">
+                    <div>
+                      <mat-form-field>
+                        <mat-label>Year</mat-label>
+                        <mat-select formControlName="year">
+                          @for (item of bussinessYears(); track $index) {
+                            <mat-option [value]="item">{{ item }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div>
+                      <mat-form-field>
+                        <mat-label>Month</mat-label>
+                        <mat-select formControlName="month">
+                          @for (item of this.MONTHS(); track $index) {
+                            <mat-option [value]="item">{{ item }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                </form>
               </div>
             </div>
-            <!-- End Legend Indicator -->
 
             <div id="voucher-dashboard"></div>        
           </div>
@@ -67,10 +80,14 @@
 </div>
       
     
-          <div class="col-span-8 ">
-              <div id="hs-single-area"></div>
+  <div class="col-span-8 ">
+    <div>
+      <span class="m-0 font-semibold text-2xl">NetProfit Dashboard</span>
+    </div>
     
-          </div>
+      <div id="hs-single-area"></div>
+
+  </div>
 
           <div class="col-span-4 ">
 

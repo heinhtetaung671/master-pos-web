@@ -21,7 +21,7 @@ export class DashboardService {
     return this.http.get<any>(`${BASE_URL}/category-voucher/monthly`, { params: { year: year, month: month }});
   }
 
-  searchVoucherMonthly(year: number, month: string) {
-    return this.http.get<any>(`${BASE_URL}/voucher/monthly`, { params: { year: year, month: month }});
+  searchVoucherMonthly(form: { year: number, month: string }) {
+    return this.http.get<any>(`${BASE_URL}/voucher/monthly`, { params: form});
   }
 }

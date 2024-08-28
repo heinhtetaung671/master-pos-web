@@ -4,6 +4,10 @@ import { Platform } from '@angular/cdk/platform';
 import { isPlatformBrowser } from '@angular/common';
 import { DashboardService } from '../../services/dashboard.service';
 import { After } from 'node:v8';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
 
 
 declare function buildTooltip(props: any, options: any): void;
@@ -17,28 +21,31 @@ declare function buildTooltipForDonut(props: any, arg1: any): void;
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [WidgetsModule],
+  imports: [WidgetsModule, ReactiveFormsModule, MatSelectModule, MatOptionModule, MatButtonModule],
   templateUrl: './dashboard.component.html',
   styles: ``
 })
-export class DashboardComponent implements OnInit, AfterViewInit{
+export class DashboardComponent implements OnInit {
   
   loading = signal<boolean>(false);
 
+  voucherDashboardMonthlyForm: FormGroup;
+
   readonly platformId = inject(PLATFORM_ID);
   readonly service = inject(DashboardService);
+  
+  readonly MONTHS = signal<any[]>([
+      'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+    ])
+
+  bussinessYears = signal<number[]>([2023, 2024])
 
   categoryPieChartLabel = signal<string[]>([]);
   categoryPieChartData = signal<any>([]);
 
-  voucherFeesData = signal<any>([]);
-  voucherExpenseData = signal<any>([]);
-
-  voucherCategory = signal<any>([]);
-
   voucherDashboard = signal<any>(undefined);
 
-  constructor() {
+  constructor(fb: FormBuilder) {
     this.service.searchCategoryVoucherMonthly(2024, 'AUGUST').subscribe({
       next: result => {
         this.categoryPieChartLabel.set(result.map((value: any) => value.categoryName));
@@ -54,23 +61,17 @@ export class DashboardComponent implements OnInit, AfterViewInit{
       }
     })
 
-    this.service.searchVoucherMonthly(2024, 'AUGUST').subscribe({
-      next: result => {
-        this.voucherCategory.set(result.map((value: any) => value.label))
-        this.voucherFeesData.set(result.map((value: any) => value.fees))
-        this.voucherExpenseData.set(result.map((value: any) => value.expenses))
-        console.log(result)
-      }
+    const CURRENT_DATE = new Date();
+
+    this.voucherDashboardMonthlyForm = fb.group({
+      year: CURRENT_DATE.getFullYear(),
+      month: this.formatSearchMonth(CURRENT_DATE.getMonth())
+    });
+
+    this.voucherDashboardMonthlyForm.valueChanges.subscribe(_ => {
+      this.refreshVoucherDashboard();
     })
-  }
 
-  ngAfterViewInit(): void {
-
-    console.log(this.voucherDashboard());
-
-    if(!this.voucherDashboard()) {
-      this.voucherDashboard.set(this.buildVoucherDashboard());
-    }
   }
 
   ngOnInit(): void {
@@ -78,7 +79,7 @@ export class DashboardComponent implements OnInit, AfterViewInit{
       if(isPlatformBrowser(this.platformId)) {
 
         if(!this.voucherDashboard()) {
-          this.voucherDashboard.set(this.buildVoucherDashboard())
+          this.voucherDashboard.set(this.buildInitialVoucherDashBoard())
         }
 
         buildChart('#hs-single-area', (mode: any) => ({
@@ -428,107 +429,236 @@ export class DashboardComponent implements OnInit, AfterViewInit{
           colors: ['rgb(38, 38, 38)']
         }
       });
+
     }
 
 
+  
+  buildInitialVoucherDashBoard() {
+    this.service.searchVoucherMonthly(this.voucherDashboardMonthlyForm.value).subscribe({
+      next: result => {
+        this.voucherDashboard.set(this.buildVoucherDashboard(result.map(mapToVoucherDashboardLabelResult), result.map(mapToVoucherDashboardFeesResult), result.map(mapToVoucherDashboardExpensesResult)));
+      }
+    })
+  }
 
-
-    buildVoucherDashboard() {
-
-      
-
-      return buildChart('#voucher-dashboard', (mode: any) => ({
-          chart: {
-            height: 300,
-            type: 'area',
-            toolbar: {
-              show: false
+  buildVoucherDashboard(label: string, feesData: any, expensesData: any) {
+    return buildChart('#voucher-dashboard', (mode: any) => ({
+        chart: {
+          height: 300,
+          type: 'area',
+          toolbar: {
+            show: false
+          },
+          zoom: {
+            enabled: false
+          }
+        },
+        series: [
+          {
+            name: 'Fees',
+            data: feesData
+          },
+          {
+            name: 'Expenses',
+            data: expensesData
+          }
+        ],
+        legend: {
+          show: true
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'straight',
+          width: 2
+        },
+        grid: {
+          strokeDashArray: 2
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            type: 'vertical',
+            shadeIntensity: 1,
+            opacityFrom: 0.1,
+            opacityTo: 0.8
+          }
+        },
+        xaxis: {
+          type: 'category',
+          tickPlacement: 'on',
+          categories: label,
+          axisBorder: {
+            show: true
+          },
+          axisTicks: {
+            show: true
+          },
+          crosshairs: {
+            stroke: {
+              dashArray: 0
             },
-            zoom: {
-              enabled: false
+            dropShadow: {
+              show: false
             }
+          },
+          tooltip: {
+            enabled: false
+          },
+          labels: {
+            style: {
+              colors: '#9ca3af',
+              fontSize: '13px',
+              fontFamily: 'Inter, ui-sans-serif',
+              fontWeight: 400
+            },
+            formatter: (title: any) => {
+              let t = title;
+
+              return t;
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            align: 'left',
+            minWidth: 0,
+            maxWidth: 140,
+            style: {
+              colors: '#9ca3af',
+              fontSize: '13px',
+              fontFamily: 'Inter, ui-sans-serif',
+              fontWeight: 400
+            },
+            formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
+          }
+        },
+        tooltip: {
+          x: {
+            format: 'MMMM yyyy'
+          },
+          y: {
+            formatter: (value: number) => `$${value >= 1000 ? `${value / 1000}k` : value}`
+          },
+          custom: function (props: { ctx?: any; dataPointIndex?: any; }) {
+            const { categories } = props.ctx.opts.xaxis;
+            const { dataPointIndex } = props;
+            const title = categories[dataPointIndex];
+
+            return buildTooltip(props, {
+              title: title,
+              mode,
+              hasTextLabel: true,
+              wrapperExtClasses: 'min-w-28',
+              labelDivider: ':',
+              labelExtClasses: 'ms-2'
+            });
+          }
+        },
+        responsive: [{
+          breakpoint: 568,
+          options: {
+            chart: {
+              height: 300
+            },
+            labels: {
+              style: {
+                colors: '#9ca3af',
+                fontSize: '11px',
+                fontFamily: 'Inter, ui-sans-serif',
+                fontWeight: 400
+              },
+              offsetX: -2,
+              formatter: (title: string | any[]) => title.slice(0, 3)
+            },
+            yaxis: {
+              labels: {
+                align: 'left',
+                minWidth: 0,
+                maxWidth: 140,
+                style: {
+                  colors: '#9ca3af',
+                  fontSize: '11px',
+                  fontFamily: 'Inter, ui-sans-serif',
+                  fontWeight: 400
+                },
+                formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
+              }
+            },
+          },
+        }]
+      }), {
+        colors: ['#2563eb', '#9333ea'],
+        fill: {
+          gradient: {
+            stops: [0, 90, 100]
+          }
+        },
+        xaxis: {
+          labels: {
+            style: {
+              colors: '#9ca3af'
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#9ca3af'
+            }
+          }
+        },
+        grid: {
+          borderColor: '#e5e7eb'
+        }
+      }, {
+        colors: ['#3b82f6', '#a855f7'],
+        fill: {
+          gradient: {
+            stops: [100, 90, 0]
+          }
+        },
+        xaxis: {
+          labels: {
+            style: {
+              colors: '#a3a3a3',
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#a3a3a3'
+            }
+          }
+        },
+        grid: {
+          borderColor: '#404040'
+        }
+  });
+  }
+  
+  refreshVoucherDashboard() {
+    this.service.searchVoucherMonthly(this.voucherDashboardMonthlyForm.value).subscribe({
+      next: result => {
+
+        const CATEGORIES = result.map(mapToVoucherDashboardLabelResult);
+        
+        this.voucherDashboard().updateOptions({
+          xaxis: {
+            categories: CATEGORIES
           },
           series: [
             {
               name: 'Fees',
-              data: this.voucherFeesData()
-            },
-            {
+              data: result.map(mapToVoucherDashboardFeesResult)
+            }, {
               name: 'Expenses',
-              data: this.voucherExpenseData()
+              data: result.map(mapToVoucherDashboardExpensesResult)
             }
-          ],
-          legend: {
-            show: true
-          },
-          dataLabels: {
-            enabled: true
-          },
-          stroke: {
-            curve: 'straight',
-            width: 2
-          },
-          grid: {
-            strokeDashArray: 2
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              type: 'vertical',
-              shadeIntensity: 1,
-              opacityFrom: 0.1,
-              opacityTo: 0.8
-            }
-          },
-          xaxis: {
-            type: 'category',
-            tickPlacement: 'on',
-            categories: this.voucherCategory(),
-            axisBorder: {
-              show: false
-            },
-            axisTicks: {
-              show: false
-            },
-            crosshairs: {
-              stroke: {
-                dashArray: 0
-              },
-              dropShadow: {
-                show: false
-              }
-            },
-            tooltip: {
-              enabled: false
-            },
-            labels: {
-              style: {
-                colors: '#9ca3af',
-                fontSize: '13px',
-                fontFamily: 'Inter, ui-sans-serif',
-                fontWeight: 400
-              },
-              formatter: (title: any) => {
-                let t = title;
-
-                return t;
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              align: 'left',
-              minWidth: 0,
-              maxWidth: 140,
-              style: {
-                colors: '#9ca3af',
-                fontSize: '13px',
-                fontFamily: 'Inter, ui-sans-serif',
-                fontWeight: 400
-              },
-              formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
-            }
-          },
+          ], 
           tooltip: {
             x: {
               format: 'MMMM yyyy'
@@ -537,105 +667,42 @@ export class DashboardComponent implements OnInit, AfterViewInit{
               formatter: (value: number) => `$${value >= 1000 ? `${value / 1000}k` : value}`
             },
             custom: function (props: { ctx?: any; dataPointIndex?: any; }) {
-              const { categories } = props.ctx.opts.xaxis;
+              const categories  = CATEGORIES;
               const { dataPointIndex } = props;
-              const title = categories[dataPointIndex].split(' ');
-              const newTitle = `${title[0]} ${title[1]}`;
-
+              const title = categories[dataPointIndex];
+  
               return buildTooltip(props, {
-                title: newTitle,
-                mode,
+                title: title,
+                mode: 'light',
                 hasTextLabel: true,
                 wrapperExtClasses: 'min-w-28',
                 labelDivider: ':',
                 labelExtClasses: 'ms-2'
               });
             }
-          },
-          responsive: [{
-            breakpoint: 568,
-            options: {
-              chart: {
-                height: 300
-              },
-              labels: {
-                style: {
-                  colors: '#9ca3af',
-                  fontSize: '11px',
-                  fontFamily: 'Inter, ui-sans-serif',
-                  fontWeight: 400
-                },
-                offsetX: -2,
-                formatter: (title: string | any[]) => title.slice(0, 3)
-              },
-              yaxis: {
-                labels: {
-                  align: 'left',
-                  minWidth: 0,
-                  maxWidth: 140,
-                  style: {
-                    colors: '#9ca3af',
-                    fontSize: '11px',
-                    fontFamily: 'Inter, ui-sans-serif',
-                    fontWeight: 400
-                  },
-                  formatter: (value: number) => value >= 1000 ? `${value / 1000}k` : value
-                }
-              },
-            },
-          }]
-        }), {
-          colors: ['#2563eb', '#9333ea'],
-          fill: {
-            gradient: {
-              stops: [0, 90, 100]
-            }
-          },
-          xaxis: {
-            labels: {
-              style: {
-                colors: '#9ca3af'
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              style: {
-                colors: '#9ca3af'
-              }
-            }
-          },
-          grid: {
-            borderColor: '#e5e7eb'
           }
-        }, {
-          colors: ['#3b82f6', '#a855f7'],
-          fill: {
-            gradient: {
-              stops: [100, 90, 0]
-            }
-          },
-          xaxis: {
-            labels: {
-              style: {
-                colors: '#a3a3a3',
-              }
-            }
-          },
-          yaxis: {
-            labels: {
-              style: {
-                colors: '#a3a3a3'
-              }
-            }
-          },
-          grid: {
-            borderColor: '#404040'
-          }
+        })
+      }
     });
-    }
-  
 
+
+  }
+  
+  formatSearchMonth(value: number) {
+    return this.MONTHS()[value];
+  }  
 }
 
+
+function mapToVoucherDashboardFeesResult(value: any) {
+  return value.fees;
+}
+
+function mapToVoucherDashboardExpensesResult(value: any) {
+  return value.expenses;
+}
+
+function mapToVoucherDashboardLabelResult(value: any) {
+  return value.label;
+}
 
