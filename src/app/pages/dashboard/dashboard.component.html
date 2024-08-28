@@ -19,30 +19,58 @@
             <div class="flex justify-between items-center">
               <span class="m-0 font-semibold text-2xl">Voucher Dashboard</span>
 
-              <div>
-                <form [formGroup]="voucherDashboardMonthlyForm" class="flex gap-1.5 place-items-center">
+              <div class="flex gap-2">
+
+                <div>
+                  <mat-form-field>
+                    <mat-label>Type</mat-label>
+                    <mat-select [formControl]="voucherDashboardType">
+                      <mat-option value="MONTHLY">Monthly</mat-option>
+                      <mat-option value="YEARLY">Yearly</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                @switch (voucherDashboardType.value) {
+                  @case ('MONTHLY') {
+                    <form [formGroup]="voucherDashboardMonthlyForm" class="flex gap-1.5 place-items-center">
+                      <div>
+                        <mat-form-field>
+                          <mat-label>Year</mat-label>
+                          <mat-select formControlName="year">
+                            @for (item of bussinessYears(); track $index) {
+                              <mat-option [value]="item">{{ item }}</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+  
+                      <div>
+                        <mat-form-field>
+                          <mat-label>Month</mat-label>
+                          <mat-select formControlName="month">
+                            @for (item of this.MONTHS(); track $index) {
+                              <mat-option [value]="item">{{ item }}</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    </form>
+                  }
+
+                  @case ('YEARLY') {
                     <div>
                       <mat-form-field>
-                        <mat-label>Year</mat-label>
-                        <mat-select formControlName="year">
+                        <mat-label>Type</mat-label>
+                        <mat-select [formControl]="voucherDashboardYearlyForm">
                           @for (item of bussinessYears(); track $index) {
                             <mat-option [value]="item">{{ item }}</mat-option>
                           }
                         </mat-select>
                       </mat-form-field>
                     </div>
-
-                    <div>
-                      <mat-form-field>
-                        <mat-label>Month</mat-label>
-                        <mat-select formControlName="month">
-                          @for (item of this.MONTHS(); track $index) {
-                            <mat-option [value]="item">{{ item }}</mat-option>
-                          }
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-                </form>
+                  }
+                }
               </div>
             </div>
 
@@ -51,7 +79,7 @@
 
 <div class="col-span-4 ">
   <div class="flex flex-col justify-center items-center">
-    <div id="hs-doughnut-chart"></div>
+    <div id="category-voucher"></div>
   
     <!-- Legend Indicator -->
     <div class="flex justify-center sm:justify-end items-center gap-x-4 mt-3 sm:mt-6">
@@ -80,13 +108,66 @@
 </div>
       
     
-  <div class="col-span-8 ">
-    <div>
-      <span class="m-0 font-semibold text-2xl">NetProfit Dashboard</span>
-    </div>
-    
-      <div id="hs-single-area"></div>
+  <div class="col-span-8 mt-4">
+    <div class="flex justify-between">
+      <span class="m-0 font-semibold text-2xl">Profit Dashboard</span>
 
+      <div class="flex gap-2">
+
+        <div>
+          <mat-form-field>
+            <mat-label>Type</mat-label>
+            <mat-select [formControl]="profitDashboardType">
+              <mat-option value="MONTHLY">Monthly</mat-option>
+              <mat-option value="YEARLY">Yearly</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @switch (profitDashboardType.value) {
+          @case ('MONTHLY') {
+            <form [formGroup]="profitDashboardMonthlyForm" class="flex gap-1.5 place-items-center">
+              <div>
+                <mat-form-field>
+                  <mat-label>Year</mat-label>
+                  <mat-select formControlName="year">
+                    @for (item of bussinessYears(); track $index) {
+                      <mat-option [value]="item">{{ item }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div>
+                <mat-form-field>
+                  <mat-label>Month</mat-label>
+                  <mat-select formControlName="month">
+                    @for (item of this.MONTHS(); track $index) {
+                      <mat-option [value]="item">{{ item }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </form>
+          }
+
+          @case ('YEARLY') {
+            <div>
+              <mat-form-field>
+                <mat-label>Type</mat-label>
+                <mat-select [formControl]="profitDashboardYearlyForm">
+                  @for (item of bussinessYears(); track $index) {
+                    <mat-option [value]="item">{{ item }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  
+    <div id="profit-dashboard"></div>
   </div>
 
           <div class="col-span-4 ">

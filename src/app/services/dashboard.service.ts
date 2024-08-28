@@ -24,4 +24,17 @@ export class DashboardService {
   searchVoucherMonthly(form: { year: number, month: string }) {
     return this.http.get<any>(`${BASE_URL}/voucher/monthly`, { params: form});
   }
+
+  searchVoucherYearly(year: number) {
+    return this.http.get<any>(`${BASE_URL}/voucher/yearly/${year}`);
+  }
+
+
+  searchProfitMonthly(form: { year: number, month: string }) {
+    return this.http.get<any>(`${BASE_URL}/profit/monthly`, { params: form});
+  }
+
+  searchProfitYearly(year: number) {
+    return this.http.get<any>(`${BASE_URL}/profit/yearly/${year}`);
+  }
 }
