@@ -10,7 +10,7 @@ import { LoadingPageComponent } from './loading-page/loading-page.component';
   declarations: [
     SideBarTabComponent,
     MsgBottomSheetComponent,
-    LoadingPageComponent
+    LoadingPageComponent,
   ],
   imports: [
     CommonModule,
@@ -19,7 +19,7 @@ import { LoadingPageComponent } from './loading-page/loading-page.component';
   exports: [
     SideBarTabComponent,
     MsgBottomSheetComponent,
-    LoadingPageComponent
+    LoadingPageComponent,
   ]
 })
 export class WidgetsModule { }

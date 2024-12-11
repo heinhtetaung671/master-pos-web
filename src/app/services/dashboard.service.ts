@@ -17,8 +17,8 @@ export class DashboardService {
     return this.http.get<any>(`${BASE_URL}/category-voucher/yearly/${year}`);
   }
 
-  searchCategoryVoucherMonthly(year: number, month: string) {
-    return this.http.get<any>(`${BASE_URL}/category-voucher/monthly`, { params: { year: year, month: month }});
+  searchCategoryVoucherMonthly(form: any) {
+    return this.http.get<any>(`${BASE_URL}/category-voucher/monthly`, { params: form});
   }
 
   searchVoucherMonthly(form: { year: number, month: string }) {
@@ -29,12 +29,19 @@ export class DashboardService {
     return this.http.get<any>(`${BASE_URL}/voucher/yearly/${year}`);
   }
 
-
   searchProfitMonthly(form: { year: number, month: string }) {
     return this.http.get<any>(`${BASE_URL}/profit/monthly`, { params: form});
   }
 
   searchProfitYearly(year: number) {
     return this.http.get<any>(`${BASE_URL}/profit/yearly/${year}`);
+  }
+
+  searchCategoryProfitYearly(year: number) {
+    return this.http.get<any>(`${BASE_URL}/category-profit/yearly/${year}`);
+  }
+
+  searchCategoryProfitMonthly(form: any) {
+    return this.http.get<any>(`${BASE_URL}/category-profit/monthly`, { params: form});
   }
 }

@@ -24,12 +24,14 @@ declare function buildTooltipForDonut(props: any, arg1: any): void;
   styles: ``
 })
 export class DashboardComponent implements OnInit {
-  
+
+  bussinessYears = signal<number[]>([2023, 2024])
   loading = signal<boolean>(false);
 
   voucherDashboard = signal<any>(undefined);
   profitDashboard = signal<any>(undefined);
   categoryVoucherDashboard = signal<any>(undefined);
+  categoryProfitDashboard = signal<any>(undefined);
 
   voucherDashboardType = new FormControl<YearlyMonthlyType>('MONTHLY');
   voucherDashboardMonthlyForm: FormGroup;
@@ -39,9 +41,13 @@ export class DashboardComponent implements OnInit {
   profitDashboardMonthlyForm: FormGroup;
   profitDashboardYearlyForm: FormControl;
 
-  categoryVoucherType = new FormControl<YearlyMonthlyType>('YEARLY');
+  categoryVoucherType = new FormControl<YearlyMonthlyType>('MONTHLY');
   categoryVoucherMonthlyForm: FormGroup;
   categoryVoucherYearlyForm: FormControl;
+
+  categoryProfitType = new FormControl<YearlyMonthlyType>('MONTHLY');
+  categoryProfitMonthlyForm: FormGroup;
+  categoryProfitYearlyForm: FormControl;
 
   readonly platformId = inject(PLATFORM_ID);
   readonly service = inject(DashboardService);
@@ -50,21 +56,8 @@ export class DashboardComponent implements OnInit {
       'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
     ])
 
-  bussinessYears = signal<number[]>([2023, 2024])
-
-  categoryPieChartLabel = signal<string[]>([]);
-  categoryPieChartData = signal<any>([]);
 
   constructor(fb: FormBuilder) {
-    this.service.searchCategoryVoucherMonthly(2024, 'AUGUST').subscribe({
-      next: result => {
-        this.categoryPieChartLabel.set(result.map((value: any) => value.categoryName));
-        this.categoryPieChartData.set(result.map((value: any) => value.vouchers));
-        console.log(this.categoryPieChartData());
-        console.log(this.categoryPieChartLabel());
-      }
-    });
-
     this.service.searchCategoryVoucherYearly(2024).subscribe({
       next: result => {
         console.log(result)
@@ -102,6 +95,13 @@ export class DashboardComponent implements OnInit {
     });
     this.categoryVoucherYearlyForm = fb.control<number>(CURRENT_DATE.getFullYear());
 
+    // CategoryProfitDashboardForms
+    this.categoryProfitMonthlyForm = fb.group({
+      year: CURRENT_DATE.getFullYear(),
+      month: this.formatSearchMonth(CURRENT_DATE.getMonth())
+    });
+    this.categoryProfitYearlyForm = fb.control<number>(CURRENT_DATE.getFullYear());
+
     this.voucherDashboardMonthlyForm.valueChanges.subscribe(_ => {
       this.refreshVoucherDashboard('MONTHLY');
     });
@@ -117,6 +117,18 @@ export class DashboardComponent implements OnInit {
     this.profitDashboardYearlyForm.valueChanges.subscribe(_ => {
       this.refreshProfitDashboard('YEARLY');
     })
+
+    this.categoryVoucherMonthlyForm.valueChanges.subscribe(_ => {
+      this.refreshCategoryVoucherDashboard('MONTHLY');
+    })
+
+    this.categoryProfitMonthlyForm.valueChanges.subscribe(_ => {
+      this.refreshCategoryProfitDashboard('MONTHLY')
+    })
+
+    this.categoryProfitYearlyForm.valueChanges.subscribe(_ => {
+      this.refreshCategoryProfitDashboard('YEARLY')
+    })
   }
 
   ngOnInit(): void {
@@ -124,85 +136,22 @@ export class DashboardComponent implements OnInit {
       if(isPlatformBrowser(this.platformId)) {
 
         if(!this.voucherDashboard()) {
-          this.voucherDashboard.set(this.buildInitialVoucherDashBoard());
+          this.buildInitialVoucherDashBoard();
         }     
 
         if(!this.profitDashboard()) {
-          this.profitDashboard.set(this.buildInitialProfitDashboard());
+          this.buildInitialProfitDashboard()
+        }
+
+        if(!this.categoryVoucherDashboard()){
+          this.buildInitialCategoryVoucherDashboard()
+        }
+
+        if(!this.categoryProfitDashboard()) {
+          this.buildInitialCategoryProfitDashboard()
         }
   
-        buildChart('#hs-pie-chart', () => ({
-          chart: {
-            width: 400,
-            height: 320,
-            type: 'pie',
-            zoom: {
-              enabled: false
-            }
-          },
-          series: this.categoryPieChartData(),
-          labels: this.categoryPieChartLabel(),
-          title: {
-            show: false
-          },
-          dataLabels: {
-            style: {
-              fontSize: '20px',
-              fontFamily: 'Inter, ui-sans-serif',
-              fontWeight: '400',
-              colors: ['#fff', '#fff', '#1f2937']
-            },
-            dropShadow: {
-              enabled: false
-            },
-            formatter: (value: number) => `${value.toFixed(1)} %`
-          },
-          plotOptions: {
-            pie: {
-              dataLabels: {
-                offset: -15
-              }
-            }
-          },
-          legend: {
-            show: false
-          },
-          stroke: {
-            width: 4
-          },
-          grid: {
-            padding: {
-              top: -10,
-              bottom: -14,
-              left: -9,
-              right: -9
-            }
-          },
-          tooltip: {
-            enabled: false
-          },
-          states: {
-            hover: {
-              filter: {
-                type: 'none'
-              }
-            }
-          }
-        }), {
-          colors: ['#3b82f6', '#22d3ee', '#e5e7eb'],
-          stroke: {
-            colors: ['rgb(255, 255, 255)']
-          }
-        }, {
-          colors: ['#3b82f6', '#22d3ee', '#404040'],
-          stroke: {
-            colors: ['rgb(38, 38, 38)']
-          }
-        });
       }
-
- 
-
     }
 
 
@@ -439,6 +388,15 @@ export class DashboardComponent implements OnInit {
             formatter: (value: number) => `$${value >= 1000 ? `${value / 1000}k` : value}`
           },
           custom: function (props: { ctx?: any; dataPointIndex?: any; }) {
+            props.ctx.opts.series = [
+              {
+                name: 'Fees',
+                data: result.map(mapToFeesResult)
+              }, {
+                name: 'Expenses',
+                data: result.map(mapToExpensesResult)
+              }
+            ]
             const categories  = CATEGORIES;
             const { dataPointIndex } = props;
             const title = categories[dataPointIndex];
@@ -476,12 +434,14 @@ export class DashboardComponent implements OnInit {
   }
 
   buildInitialProfitDashboard() {
+    let subscribeFunc = (result: any) => {
+      this.profitDashboard.set(this.buildProfitDashboard(result.map(mapToLabelResult), result.map(mapToProfitResult)));
+    }
+
     switch(this.profitDashboardType.value) {
       case 'MONTHLY': {
         this.service.searchProfitMonthly(this.profitDashboardMonthlyForm.value).subscribe({
-          next: result => {
-            this.profitDashboard.set(this.buildProfitDashboard(result.map(mapToLabelResult), result.map(mapToProfitResult)));
-          }
+          next: subscribeFunc
         });
 
         break;
@@ -489,9 +449,7 @@ export class DashboardComponent implements OnInit {
 
       case 'YEARLY': {
         this.service.searchProfitYearly(this.profitDashboardYearlyForm.value).subscribe({
-          next: result => {
-            this.profitDashboard.set(this.buildProfitDashboard(result.map(mapToLabelResult), result.map(mapToProfitResult)))
-          }
+          next: subscribeFunc
         })
 
         break;
@@ -595,7 +553,6 @@ export class DashboardComponent implements OnInit {
           const { categories } = props.ctx.opts.xaxis;
           const { dataPointIndex } = props;
           const title = categories[dataPointIndex];
-
 
           return buildTooltip(props, {
             title: title,
@@ -714,6 +671,11 @@ export class DashboardComponent implements OnInit {
               formatter: (value: number) => `$${value >= 1000 ? `${value / 1000}k` : value}`
             },
             custom: function (props: { ctx?: any; dataPointIndex?: any; }) {
+              props.ctx.opts.series = [
+                {
+                name: 'Profit',
+                data: result.map(mapToProfitResult)
+              }]
               const categories  = CATEGORIES;
               const { dataPointIndex } = props;
               const title = categories[dataPointIndex];
@@ -753,11 +715,33 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  buildInitialCategoryVoucherDashboard() {
+    let subscribeFunc = (result: any) => {
+      this.categoryVoucherDashboard.set(this.buildCategoryVoucherDashboard(result.map(mapToLabelResult), result.map(mapToVouchersResult)))
+    }
+
+    switch(this.categoryVoucherType.value) {
+      case 'MONTHLY': {
+        this.service.searchCategoryVoucherMonthly(this.categoryVoucherMonthlyForm.value).subscribe({
+          next: subscribeFunc
+        });
+
+        break;
+      }
+
+      case 'YEARLY': {
+        this.service.searchCategoryVoucherYearly(this.categoryVoucherYearlyForm.value).subscribe({
+          next: subscribeFunc
+        })
+      }
+    }
+  }
+
   buildCategoryVoucherDashboard(labels: string[], vouchers: any) {
     return buildChart('#category-voucher', (mode: string) => ({
       chart: {
-        height: 300,
-        width: 400,
+        height: 240,
+        width: 500,
         type: 'donut',
         zoom: {
           enabled: false
@@ -766,17 +750,17 @@ export class DashboardComponent implements OnInit {
       plotOptions: {
         pie: {
           donut: {
-            size: '76%'
+            size: '70%'
           }
         }
       },
       series: vouchers,
       labels: labels,
       legend: {
-        show: false
+        show: true
       },
       dataLabels: {
-        enabled: false
+        enabled: true
       },
       stroke: {
         width: 5
@@ -819,8 +803,154 @@ export class DashboardComponent implements OnInit {
   }
 
   refreshCategoryVoucherDashboard(type: YearlyMonthlyType) {
-    
+    if(this.categoryVoucherDashboard()) {
+      let subscribeFunc = (result: any) => {
+        this.categoryVoucherDashboard().updateOptions({
+          labels: result.map(mapToLabelResult),
+          series: result.map(mapToVouchersResult)
+        })
+      }
+      switch(type) {
+        case 'MONTHLY': {
+          this.service.searchCategoryVoucherMonthly(this.categoryVoucherMonthlyForm.value).subscribe({
+            next: subscribeFunc
+          });
+
+          break;
+        }
+
+        case 'YEARLY': {
+          this.service.searchCategoryVoucherYearly(this.categoryVoucherYearlyForm.value).subscribe({
+            next: subscribeFunc
+          })
+        }
+      }
+    }
   }
+
+  buildInitialCategoryProfitDashboard() {
+      let subscribeFunc = (result: any) => {
+        console.log(result)
+        this.categoryProfitDashboard.set(this.buildCategoryProfitDashboard(result.map(mapToLabelResult), result.map(mapToProfitResult)))
+      }
+  
+      switch(this.categoryProfitType.value) {
+        case 'MONTHLY': {
+          this.service.searchCategoryProfitMonthly(this.categoryProfitMonthlyForm.value).subscribe({
+            next: subscribeFunc
+          });
+  
+          break;
+        }
+  
+        case 'YEARLY': {
+          this.service.searchCategoryProfitYearly(this.categoryProfitYearlyForm.value).subscribe({
+            next: subscribeFunc
+          })
+        }
+      }
+  }
+
+  buildCategoryProfitDashboard(labels: string[], profits: any) {
+    return buildChart('#category-profit', () => ({
+      chart: {
+        height: '300',
+        width: 400,
+        type: 'pie',
+        zoom: {
+          enabled: false
+        }
+      },
+      series: profits,
+      labels: labels,
+      title: {
+        show: true
+      },
+      dataLabels: {
+        enabled: true,
+        style: {
+          fontSize: '12px',
+          fontFamily: 'Inter, ui-sans-serif',
+          fontWeight: '400',
+          colors: ['#fff', '#fff', '#1f2937']
+        },
+        dropShadow: {
+          enabled: false
+        },
+        formatter: (value: any) => `${value.toFixed(1)} %`
+      },
+      plotOptions: {
+        pie: {
+          dataLabels: {
+            offset: -15
+          }
+        }
+      },
+      legend: {
+        show: true
+      },
+      stroke: {
+        width: 4
+      },
+      grid: {
+        padding: {
+          top: -10,
+          bottom: -14,
+          left: -9,
+          right: -9
+        }
+      },
+      tooltip: {
+        enabled: true, 
+        formatter: (value: number) => `$${value >= 1000 ? `${value / 1000}k` : value}`
+      },
+      states: {
+        hover: {
+          filter: {
+            type: 'none'
+          }
+        }
+      }
+    }), {
+      colors: ['#3b82f6', '#22d3ee', '#e5e7eb'],
+      stroke: {
+        colors: ['rgb(255, 255, 255)']
+      }
+    }, {
+      colors: ['#3b82f6', '#22d3ee', '#404040'],
+      stroke: {
+        colors: ['rgb(38, 38, 38)']
+      }
+    });
+  }
+
+  refreshCategoryProfitDashboard(type: YearlyMonthlyType) {
+    if(this.categoryProfitDashboard()) {
+      let subscribeFunc = (result: any) => {
+        this.categoryProfitDashboard().updateOptions({
+          labels: result.map(mapToLabelResult),
+          series: result.map(mapToProfitResult)
+        })
+        console.log(result)
+      }
+      switch(type) {
+        case 'MONTHLY': {
+          this.service.searchCategoryProfitMonthly(this.categoryProfitMonthlyForm.value).subscribe({
+            next: subscribeFunc
+          });
+
+          break;
+        }
+
+        case 'YEARLY': {
+          this.service.searchCategoryProfitYearly(this.categoryProfitYearlyForm.value).subscribe({
+            next: subscribeFunc
+          })
+        }
+      }
+    }
+  }
+
 
   formatSearchMonth(value: number) {
     return this.MONTHS()[value];
@@ -844,3 +974,6 @@ function mapToProfitResult(value: any) {
   return value.profit
 }
 
+function mapToVouchersResult(value: any) {
+  return value.vouchers;
+}
